@@ -343,8 +343,6 @@ FROM
 ) aa
 ;
 
--- BUGBUG
-
 SELECT aa.gender, aa.first_state, cc.period, aa.cohort_size
 FROM
 (
@@ -364,11 +362,16 @@ FROM
 ) aa
 JOIN
 (
-        SELECT generate_series as period 
-        FROM generate_series(0,20,1)
+      SELECT ROW_NUMBER() OVER() AS period FROM (
+        SELECT 1 FROM (
+            SELECT date(0) + INTERVAL '1 second' AS se UNION ALL
+            SELECT date(0) + INTERVAL '20 seconds' AS se ) a
+        TIMESERIES tm AS '1 second' OVER(ORDER BY se)
+    ) b
 ) cc on 1 = 1
 ;
 
+-- BUGBUG
 
 SELECT aaa.gender, aaa.first_state, aaa.period, aaa.cohort_size
 ,coalesce(ddd.cohort_retained,0) as cohort_retained
